@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OTP Autofill</title>
+  <style>
+    body {
+      width: 200px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      background-color: #4285F4;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #357ABD;
+    }
+    #getOtp {
+      background-color: #34A853;
+    }
+    #signIn, #getOtp {
+      display: none; /* Hide both buttons by default */
+    }
+  </style>
+</head>
+<body>
+  <h2>OTP Autofill</h3>
+  <img src="icon128.png" alt="Logo" width="50">
+  <button id="signIn">Sign In with Google</button>
+  <button id="getOtp">Get OTP</button>
+  <script src="popup.js"></script>
+</body>
+</html>
