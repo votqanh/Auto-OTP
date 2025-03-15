@@ -13,6 +13,8 @@ Log in once, sit back, and let the extension handle the rest!
   <img width="100%" alt="demogif" src="https://github.com/user-attachments/assets/70d0f121-742c-42e7-8d31-cc72020b1f79" />
 </p>
 
+<img align="left" width="40" height="40" alt="icon" src="https://github.com/user-attachments/assets/4e8e45a2-7fb5-4575-9ed8-a35e67665d60" />
+
 ## Roadmap
 
 - [x] [Proof of concept](https://github.com/user-attachments/assets/732d9093-dfe4-47c2-82e0-5b8e393b9c1f)
