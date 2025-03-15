@@ -10,12 +10,12 @@ Log in once, sit back, and let the extension handle the rest!
 - Login via the extension, and grab your OTP at a click of a button
 
 <p align="center" >
-  <img width="800" alt="demogif" src="https://github.com/user-attachments/assets/732d9093-dfe4-47c2-82e0-5b8e393b9c1f" />
+  <img width="100%" alt="demogif" src="https://github.com/user-attachments/assets/70d0f121-742c-42e7-8d31-cc72020b1f79" />
 </p>
 
 ## Roadmap
 
-- [x] Proof of concept
+- [x] [Proof of concept](https://github.com/user-attachments/assets/732d9093-dfe4-47c2-82e0-5b8e393b9c1f)
 - [ ] Test autofill on popular sites
 - [ ] Make popup optional
 - [ ] Add support for Proton and Outlook
