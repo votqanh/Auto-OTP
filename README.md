@@ -16,7 +16,9 @@ Log in once, sit back, and let the extension handle the rest!
 ## Roadmap
 
 - [x] [Proof of concept](https://github.com/user-attachments/assets/732d9093-dfe4-47c2-82e0-5b8e393b9c1f)
-- [ ] Test autofill on popular sites
-- [ ] Make popup optional
+- [x] Test autofill on popular sites
+- [ ] Sign in to multiple accounts
+- [ ] Make popup optionally only appear if no OTP is found
+- [ ] Add copy to clipboard
 - [ ] Add support for Proton and Outlook
 - [ ] Add support for alphanumeric and longer OTPs

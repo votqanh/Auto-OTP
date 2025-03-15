@@ -1,0 +1,19 @@
+{
+  "name": "email-otp",
+  "version": "1.0.0",
+  "description": "<p align=\"center\" >   <img width=\"300\" alt=\"logo\" src=\"https://github.com/user-attachments/assets/5e5b8649-9355-462d-a17b-b1e45ec0f23b\" /> </p>",
+  "main": "src/background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild src/background.js --bundle --platform=node --outfile=dist/background.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "html-to-text": "^9.0.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.1"
+  }
+}

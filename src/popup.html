@@ -27,16 +27,24 @@
     #getOtp {
       background-color: #34A853;
     }
-    #signIn, #getOtp {
+    #signOut {
+      background-color: #ff9b92; /* Red color for Sign Out */
+    }
+    #signIn, #getOtp, #signOut {
       display: none; /* Hide both buttons by default */
+    }
+    #email {
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <h2>OTP Autofill</h3>
-  <img src="icon128.png" alt="Logo" width="50">
+  <img src="../assets/icon128.png" alt="Logo" width="60">
   <button id="signIn">Sign In with Google</button>
+  <span id="email"></span>
   <button id="getOtp">Get OTP</button>
+  <button id="signOut">Sign Out</button>
   <script src="popup.js"></script>
 </body>
 </html>

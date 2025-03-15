@@ -23,12 +23,24 @@ function autofillOTP(otp) {
 // Add focus event listeners to OTP input fields
 function addFocusListeners() {
   // Check for an OTP input field with autocomplete="one-time-code"
-  const otpInput = document.querySelector('input[autocomplete="one-time-code"]');
+  const otpInput = document.querySelector('input[autocomplete="one-time-code"], \
+    input[name*="otp"], input[name*="code"], input[id*="otp"], input[id*="code"], \
+    input[class*="otp"], input[class*="code"]');
   if (otpInput) {
     otpInput.addEventListener("focus", () => {
       chrome.storage.local.get("otp", (data) => {
         if (data.otp) {
           otpInput.value = data.otp;
+
+          // Create and dispatch a paste event
+          const pasteEvent = new Event('paste', { bubbles: true });
+          pasteEvent.clipboardData = {
+              getData: () => data.otp, // Simulate clipboard data
+          };
+          otpInput.dispatchEvent(pasteEvent);
+
+          // Trigger an input event as well
+          otpInput.dispatchEvent(new Event('input', { bubbles: true }));
           console.log("Autofilled OTP input field on focus:", otpInput); // Log the autofill action
         }
       });

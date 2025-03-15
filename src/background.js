@@ -1,3 +1,5 @@
+import { convert } from "html-to-text";
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getOtp") {
       chrome.identity.getAuthToken({ interactive: false }, (token) => {
@@ -8,7 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
   
         // Define the search query for OTP-related emails
-        const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "verification code")
+        const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "verification code" OR "one-time pass code")
           -in:spam -in:trash newer_than:1d`;
 
         // Fetch emails matching the query
@@ -92,9 +94,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   });
   
   function extractOTP(text) {
-    // Use regex to find OTPs in the email body
-    const otpRegex = /\b(?:\d{4,6}|\d{3}-\d{3})\b/g; // Match 4-6 digits OR 3 digits, a hyphen, and 3 digits
-    const match = text.match(otpRegex);
+    // Edge case: HTML body (Uber sends OTPs in HTML emails)
+    const parsed = convert(text, {
+      wordwrap: 100, // Ensures text isn't too long
+      selectors: [
+          { selector: "img", format: "skip" }, // Remove images
+          { selector: "a", options: { ignoreHref: true } } // Remove links
+      ]
+    });
+
+    // This regex matches OTPs that are:
+    // 4-6 digits long
+    // not 1990-2025 (to avoid matching years)
+    // possibly separated by a hyphen (e.g., "123-456")
+    const otpRegex = /\b(?!(?:19[9][0-9]|20[0-2][0-5])\b)(?:\d{4,6}|\d{3}-\d{3})\b/g;
+    const match = parsed.match(otpRegex);
+
+    console.log(text);
+    console.log(parsed);
   
     if (match) {
       // Remove non-digit characters (e.g., hyphens) from the matched OTP
