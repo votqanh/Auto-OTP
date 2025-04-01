@@ -1,25 +1,3 @@
-// Function to autofill OTP
-function autofillOTP(otp) {
-  console.log("Attempting to autofill OTP:", otp); // Log the autofill attempt
-
-  // Check for an OTP input field with autocomplete="one-time-code"
-  const otpInput = document.querySelector('input[autocomplete="one-time-code"]');
-  if (otpInput) {
-    otpInput.value = otp;
-    console.log("Autofilled OTP input field:", otpInput); // Log the autofill action
-    return;
-  }
-
-  // Fallback: Check for multiple OTP input fields (e.g., 4-6 individual boxes)
-  const otpInputs = document.querySelectorAll('input[type="text"][maxlength="1"], input[type="number"][maxlength="1"]');
-  if (otpInputs.length === otp.length) {
-    otp.split('').forEach((digit, index) => {
-      otpInputs[index].value = digit;
-    });
-    console.log("Autofilled multiple input fields:", otpInputs); // Log the autofill action
-  }
-}
-
 // Add focus event listeners to OTP input fields
 function addFocusListeners() {
   // Check for an OTP input field with autocomplete="one-time-code"
@@ -32,15 +10,9 @@ function addFocusListeners() {
         if (data.otp) {
           otpInput.value = data.otp;
 
-          // Create and dispatch a paste event
-          const pasteEvent = new Event('paste', { bubbles: true });
-          pasteEvent.clipboardData = {
-              getData: () => data.otp, // Simulate clipboard data
-          };
-          otpInput.dispatchEvent(pasteEvent);
-
-          // Trigger an input event as well
+          // Trigger input and change events to simulate user interaction
           otpInput.dispatchEvent(new Event('input', { bubbles: true }));
+          otpInput.dispatchEvent(new Event('change', { bubbles: true }));
           console.log("Autofilled OTP input field on focus:", otpInput); // Log the autofill action
         }
       });
@@ -51,13 +23,16 @@ function addFocusListeners() {
   const otpInputs = document.querySelectorAll('input[type="text"][maxlength="1"], input[type="number"][maxlength="1"]');
   if (otpInputs.length > 0) {
     otpInputs.forEach((input) => {
-      input.addEventListener("focus", () => {
+      input.addEventListener("click", () => {
+        console.log("Clicked OTP input field:", input); // Log the click event
         chrome.storage.local.get("otp", (data) => {
           if (data.otp) {
             otpInputs.forEach((input, index) => {
               input.value = data.otp[index] || "";
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              // input.dispatchEvent(new Event('change', { bubbles: true }));
             });
-            console.log("Autofilled multiple input fields on focus:", otpInputs); // Log the autofill action
+            console.log("Autofilled multiple input fields on click:", otpInputs); // Log the autofill action
           }
         });
       });

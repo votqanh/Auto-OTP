@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
   
         // Define the search query for OTP-related emails
-        const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "verification code" OR "one-time pass code")
+        const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "verification code" OR "one-time pass code" OR "confirmation code")
           -in:spam -in:trash newer_than:1d`;
 
         // Fetch emails matching the query
@@ -107,15 +107,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // 4-6 digits long
     // not 1990-2025 (to avoid matching years)
     // possibly separated by a hyphen (e.g., "123-456")
-    const otpRegex = /\b(?!(?:19[9][0-9]|20[0-2][0-5])\b)(?:\d{4,6}|\d{3}-\d{3})\b/g;
+    // alphanumeric (e.g., "F4U-3BE")
+    const otpRegex = /\b(?!(?:19[9][0-9]|20[0-2][0-5])\b)(?:[A-Z0-9]{4,6}|[A-Z0-9]{3}-[A-Z0-9]{3})\b/g;
     const match = parsed.match(otpRegex);
 
     console.log(text);
     console.log(parsed);
   
     if (match) {
-      // Remove non-digit characters (e.g., hyphens) from the matched OTP
-      const cleanedOTP = match[0].replace(/\D/g, ''); // \D matches any non-digit character
+      // Remove non-alphanumeric characters from the OTP
+      const cleanedOTP = match[0].replace(/[^A-Z0-9]/g, "");
       return cleanedOTP;
     }
   
