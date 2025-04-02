@@ -1,3 +1,4 @@
 .env
 manifest.json
 node_modules
+dist/
