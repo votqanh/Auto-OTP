@@ -1,124 +1,157 @@
-import { convert } from "html-to-text";
+import { extractOTP, fetchUserEmail } from "./utils.js";
+
+const clientId = chrome.runtime.getManifest().oauth2.client_id;
+const redirectUri = chrome.identity.getRedirectURL();
+const scopes = chrome.runtime.getManifest().oauth2.scopes.join(" ");
+
+const authUrl = `https://accounts.google.com/o/oauth2/auth?` +
+                `client_id=${clientId}&` +
+                `response_type=token&` +
+                `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+                `scope=${encodeURIComponent(scopes)}`;
+
+console.log(clientId);
+console.log(redirectUri);
+console.log(authUrl);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getOtp") {
-      chrome.identity.getAuthToken({ interactive: false }, (token) => {
-        if (chrome.runtime.lastError) {
-          console.error("OAuth Error:", chrome.runtime.lastError);
-          sendResponse({ otp: null });
-          return;
-        }
-  
-        // Define the search query for OTP-related emails
-        const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "verification code" OR "one-time pass code" OR "confirmation code")
-          -in:spam -in:trash newer_than:1d`;
+        // Retrieve tokens from storage
+        chrome.storage.local.get("accounts", async (result) => {
+            const accounts = result.accounts || [];
+            if (accounts.length === 0) {
+                console.error("No accounts found in storage.");
+                sendResponse({ otp: null });
+                return;
+            }
 
-        // Fetch emails matching the query
-        fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=1&orderBy=internalDate`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`API Error: ${response.status} ${response.statusText}`);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Gmail API Response:", data); // Log the API response
-            if (data.messages && data.messages.length > 0) {
-              // Fetch the first matching email
-              return fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${data.messages[0].id}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              });
-            } else {
-              console.log("No matching emails found.");
-              sendResponse({ otp: null });
-              return null; // Explicitly return null to avoid undefined
-            }
-          })
-          .then((response) => {
-            if (!response) {
-              return; // Exit if response is null
-            }
-            if (!response.ok) {
-              throw new Error(`API Error: ${response.status} ${response.statusText}`);
-            }
-            return response.json();
-          })
-          .then((email) => {
-            if (!email) {
-              return; // Exit if email is null
-            }
-            console.log("Email Details:", email); // Log the email details
-  
-            // Extract the email body
-            let body = "";
-            if (email.payload.body.data) {
-              // Plain text email
-              body = atob(email.payload.body.data.replace(/-/g, '+').replace(/_/g, '/'));
-            } else if (email.payload.parts) {
-              // Multipart email (e.g., HTML + plain text)
-              for (const part of email.payload.parts) {
-                if (part.mimeType === "text/plain" && part.body.data) {
-                  body = atob(part.body.data.replace(/-/g, '+').replace(/_/g, '/'));
-                  break;
+            const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "sign-in code" OR "sign in code" OR "verification code" OR "one-time pass code" OR "confirmation code")
+                -in:spam -in:trash newer_than:1d`;
+
+            let latestEmail = null;
+            let latestTimestamp = 0;
+
+            // Iterate over all accounts
+            for (const account of accounts) {
+                const token = account.token;
+
+                try {
+                    // Fetch emails matching the query for the current account
+                    const response = await fetch(
+                        `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=1&orderBy=internalDate`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    if (data.messages && data.messages.length > 0) {
+                        // Fetch the first matching email
+                        const emailResponse = await fetch(
+                            `https://gmail.googleapis.com/gmail/v1/users/me/messages/${data.messages[0].id}`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
+                            }
+                        );
+
+                        if (!emailResponse.ok) {
+                            throw new Error(`API Error: ${emailResponse.status} ${emailResponse.statusText}`);
+                        }
+
+                        const email = await emailResponse.json();
+                        const timestamp = parseInt(email.internalDate, 10);
+
+                        // Compare timestamps to find the latest email
+                        if (timestamp > latestTimestamp) {
+                            latestTimestamp = timestamp;
+                            latestEmail = email;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error fetching emails for account ${account.email}:`, error);
                 }
-              }
             }
-  
-            const otp = extractOTP(body); // Extract OTP from email body
-  
-            if (otp) {
-              // Store the OTP in localStorage
-              chrome.storage.local.set({ otp: otp }, () => {
-                sendResponse({ otp: otp });
-              });
+
+            if (latestEmail) {
+                console.log("Latest Email Details:", latestEmail);
+
+                // Extract the email body
+                let body = "";
+                if (latestEmail.payload.body.data) {
+                    // Plain text email
+                    body = atob(latestEmail.payload.body.data.replace(/-/g, '+').replace(/_/g, '/'));
+                } else if (latestEmail.payload.parts) {
+                    // Multipart email (e.g., HTML + plain text)
+                    for (const part of latestEmail.payload.parts) {
+                        if (part.mimeType === "text/plain" && part.body.data) {
+                            body = atob(part.body.data.replace(/-/g, '+').replace(/_/g, '/'));
+                            break;
+                        }
+                    }
+                }
+
+                const otp = extractOTP(body); // Extract OTP from email body
+
+                if (otp) {
+                  chrome.storage.local.set({ otp: otp }, () => {
+                    sendResponse({ otp: otp });
+                  });
+                } else {
+                    console.log("No OTP found in the email body.");
+                    sendResponse({ otp: null });
+                }
             } else {
-              console.log("No OTP found in the email body.");
-              sendResponse({ otp: null });
+                console.log("No matching emails found across all accounts.");
+                sendResponse({ otp: null });
             }
-          })
-          .catch((error) => {
-            console.error("Fetch Error:", error);
-            sendResponse({ otp: null });
-          });
-      });
-  
-      // Return true to indicate that the response will be sent asynchronously
-      return true;
-    }
-  });
-  
-  function extractOTP(text) {
-    // Edge case: HTML body (Uber sends OTPs in HTML emails)
-    const parsed = convert(text, {
-      wordwrap: 100, // Ensures text isn't too long
-      selectors: [
-          { selector: "img", format: "skip" }, // Remove images
-          { selector: "a", options: { ignoreHref: true } } // Remove links
-      ]
-    });
+        });
 
-    // This regex matches OTPs that are:
-    // 4-6 digits long
-    // not 1990-2025 (to avoid matching years)
-    // possibly separated by a hyphen (e.g., "123-456")
-    // alphanumeric (e.g., "F4U-3BE")
-    const otpRegex = /\b(?!(?:19[9][0-9]|20[0-2][0-5])\b)(?:[A-Z0-9]{4,6}|[A-Z0-9]{3}-[A-Z0-9]{3})\b/g;
-    const match = parsed.match(otpRegex);
-
-    console.log(text);
-    console.log(parsed);
-  
-    if (match) {
-      // Remove non-alphanumeric characters from the OTP
-      const cleanedOTP = match[0].replace(/[^A-Z0-9]/g, "");
-      return cleanedOTP;
+        // Return true to indicate that the response will be sent asynchronously
+        return true;
     }
-  
-    return null; // Return null if no OTP is found
-  }
+
+    else if (request.action === "addAccount") {
+      chrome.identity.launchWebAuthFlow(
+        { url: authUrl, interactive: true },
+        (redirectUrl) => {
+            if (chrome.runtime.lastError || !redirectUrl) {
+                console.error("OAuth Error:", chrome.runtime.lastError);
+                alert("Sign-in failed. Please try again.");
+                return;
+            }
+
+            const token = new URL(redirectUrl).hash
+                .substring(1)
+                .split("&")
+                .find((param) => param.startsWith("access_token"))
+                .split("=")[1];
+
+            fetchUserEmail(token)
+              .then((email) => {
+                  chrome.storage.local.get("accounts", (result) => {
+                      const accounts = result.accounts || [];
+                      accounts.push({ email, token });
+                      chrome.storage.local.set({ accounts }, () => {
+                          console.log("Account added:", email);
+                      });
+                  });
+
+                  sendResponse({ email });
+              })
+              .catch((error) => {
+                  sendResponse({ error: "Failed to fetch user email.\n" + error });
+              });
+
+            return true; // Indicate that the response will be sent asynchronously
+        }
+    );
+    }
+});

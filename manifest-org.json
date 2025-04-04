@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Email OTP Autofill",
+  "name": "Auto OTP",
   "version": "1.0",
   "description": "Authenticate with Gmail and autofill OTPs from emails",
   "permissions": [
@@ -21,10 +21,10 @@
     }
   },
   "oauth2": {
-    "client_id": "process.env.GOOGLE_CLIENT_ID",
+    "client_id": "GOOGLE_CLIENT_ID",
     "scopes": [
       "https://www.googleapis.com/auth/gmail.readonly",
-      "email"
+      "https://www.googleapis.com/auth/userinfo.email"
     ]
   },
   "icons": {

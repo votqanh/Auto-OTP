@@ -4,7 +4,7 @@
   <title>OTP Autofill</title>
   <style>
     body {
-      width: 200px;
+      width: 250px;
       padding: 10px;
       font-family: Arial, sans-serif;
       display: flex;
@@ -24,27 +24,42 @@
     button:hover {
       background-color: #357ABD;
     }
-    #getOtp {
+    #addAccount {
       background-color: #34A853;
     }
-    #signOut {
-      background-color: #ff9b92; /* Red color for Sign Out */
-    }
-    #signIn, #getOtp, #signOut {
-      display: none; /* Hide both buttons by default */
-    }
-    #email {
+    .account-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
       margin-top: 10px;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .email-label {
+      font-size: 14px;
+      flex-grow: 1;
+    }
+    .remove-button {
+      background-color: #ff9b92;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px;
+      cursor: pointer;
+    }
+    .remove-button:hover {
+      background-color: #e57373;
     }
   </style>
 </head>
 <body>
-  <h2>OTP Autofill</h3>
+  <h2>OTP Autofill</h2>
   <img src="../assets/icon128.png" alt="Logo" width="60">
-  <button id="signIn">Sign In with Google</button>
-  <span id="email"></span>
+  <button id="addAccount">Add Account</button>
+  <div id="accountList"></div>
   <button id="getOtp">Get OTP</button>
-  <button id="signOut">Sign Out</button>
-  <script src="popup.js"></script>
+  <script src="../dist/popup.js"></script>
 </body>
 </html>

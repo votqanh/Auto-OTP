@@ -2,7 +2,7 @@
 function addFocusListeners() {
   // Check for an OTP input field with autocomplete="one-time-code"
   const otpInput = document.querySelector('input[autocomplete="one-time-code"], \
-    input[name*="otp"], input[name*="code"], input[id*="otp"], input[id*="code"], \
+    input[name*="otp"], input[name*="code"], input[name*="token"], input[id*="otp"], input[id*="code"], \
     input[class*="otp"], input[class*="code"]');
   if (otpInput) {
     otpInput.addEventListener("focus", () => {
