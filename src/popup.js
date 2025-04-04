@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Popup loaded");
-  
+
     // Check for an existing token
     chrome.identity.getAuthToken({ interactive: false }, (token) => {
       if (chrome.runtime.lastError) {
@@ -45,21 +45,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sign Out button logic
     document.getElementById("signOut").addEventListener("click", () => {
         chrome.identity.getAuthToken({ interactive: false }, (token) => {
-        if (chrome.runtime.lastError) {
-            console.error("Error fetching token:", chrome.runtime.lastError);
-            return;
-        }
-    
-        // Remove the cached token
-        chrome.identity.removeCachedAuthToken({ token }, () => {
-            console.log("Signed out successfully");
-            // Hide the Get OTP and Sign Out buttons, and show the Sign In button
-            document.getElementById("getOtp").style.display = "none";
-            document.getElementById("signOut").style.display = "none";
-            document.getElementById("signIn").style.display = "block";
-            // Clear the displayed emai
-            displayUserEmail("");
-        });
+          console.log("Token for sign out:", token);
+          if (chrome.runtime.lastError) {
+              console.error("Error fetching token:", chrome.runtime.lastError);
+              return;
+          }
+      
+          // Remove the cached token
+          var url = 'https://accounts.google.com/o/oauth2/revoke?token=' + token;
+          window.fetch(url);
+
+          chrome.identity.removeCachedAuthToken({ token: token }, () => {
+              console.log("Signed out successfully");
+              // Hide the Get OTP and Sign Out buttons, and show the Sign In button
+              document.getElementById("getOtp").style.display = "none";
+              document.getElementById("signOut").style.display = "none";
+              document.getElementById("signIn").style.display = "block";
+              // Clear the displayed emai
+              displayUserEmail("");
+          });
         });
     });
 
