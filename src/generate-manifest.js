@@ -19,7 +19,7 @@ const manifestFilePath = path.join(__dirname, '..', 'manifest-org.json');
 const manifestContent = fs.readFileSync(manifestFilePath, 'utf8');
 
 // Replace the placeholder with the actual GOOGLE_CLIENT_ID
-const updatedManifestContent = manifestContent.replace(/process\.env\.GOOGLE_CLIENT_ID/g, `${clientId}`);
+const updatedManifestContent = manifestContent.replace(/GOOGLE_CLIENT_ID/g, `${clientId}`);
 
 // Write new manifest.json
 const generatedManifestFilePath = path.join(__dirname, '..', 'manifest.json');
