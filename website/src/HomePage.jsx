@@ -110,12 +110,12 @@ function HomePage() {
     <p className="max-w-2xl mx-auto text-base md:text-lg mb-4">
         We value your privacy. Auto OTP uses OAuth for secure Gmail access and does not store your credentials.
     </p>
-    <Link
-        to="/privacy"
-        className="text-blue-600 no-underline transition-transform duration-300 transform hover:scale-105"
+    <a
+      href="https://autootp.ca/privacy"
+      className="text-blue-600 no-underline transition-transform duration-300 transform hover:scale-105"
     >
-        Read full privacy policy
-    </Link>
+      Read full Privacy Policy
+    </a>
     <p className="mt-4">
         <Link
         to="/tos"
