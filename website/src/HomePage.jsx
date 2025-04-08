@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import './index.css';
 
 function HomePage() {
   return (
@@ -103,18 +105,26 @@ function HomePage() {
       </section>
 
       {/* Short Privacy Policy Section */}
-      <section id="privacy" className="py-12 text-center px-4 bg-gray-50">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4">Privacy Policy</h2>
-        <p className="max-w-2xl mx-auto text-base md:text-lg mb-4">
-          We value your privacy. Auto OTP uses OAuth for secure Gmail access and does not store your credentials.
-        </p>
+    <section id="privacy" className="py-12 text-center px-4 bg-gray-50">
+    <h2 className="text-2xl md:text-3xl font-bold mb-4">Privacy Policy</h2>
+    <p className="max-w-2xl mx-auto text-base md:text-lg mb-4">
+        We value your privacy. Auto OTP uses OAuth for secure Gmail access and does not store your credentials.
+    </p>
+    <Link
+        to="/privacy"
+        className="text-blue-600 no-underline transition-transform duration-300 transform hover:scale-105"
+    >
+        Read full privacy policy
+    </Link>
+    <p className="mt-4">
         <Link
-          to="/privacy"
-          className="text-blue-600 no-underline transition-transform duration-300 transform hover:scale-105"
+        to="/tos"
+        className="text-blue-600 no-underline transition-transform duration-300 transform hover:scale-105"
         >
-          Read full privacy policy
+        Read full Terms of Service
         </Link>
-      </section>
+    </p>
+    </section>
 
       {/* Footer */}
       <footer className="py-6 text-center bg-gray-100">
