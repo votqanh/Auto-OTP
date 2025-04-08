@@ -25,7 +25,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 return;
             }
 
-            const query = `is:unread ("OTP" OR "one-time code" OR "login code" OR "sign-in code" OR "sign in code" OR "verification code" OR "one-time pass code" OR "confirmation code")
+            const query = `is:unread ("OTP" OR "one-time code" OR "login code" 
+            OR "sign-in code" OR "sign in code" OR "verification code" 
+            OR "one-time pass code" OR "confirmation code"
+            OR "security code" OR "-digit code" OR "authentication code")
                 -in:spam -in:trash newer_than:1d`;
 
             let latestEmail = null;
@@ -119,39 +122,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     else if (request.action === "addAccount") {
-      chrome.identity.launchWebAuthFlow(
-        { url: authUrl, interactive: true },
-        (redirectUrl) => {
-            if (chrome.runtime.lastError || !redirectUrl) {
-                console.error("OAuth Error:", chrome.runtime.lastError);
-                alert("Sign-in failed. Please try again.");
-                return;
+        chrome.identity.launchWebAuthFlow(
+            { url: authUrl, interactive: true },
+            (redirectUrl) => {
+                if (chrome.runtime.lastError || !redirectUrl) {
+                    console.error("OAuth Error:", chrome.runtime.lastError);
+                    alert("Sign-in failed. Please try again.");
+                    return;
+                }
+
+                const token = new URL(redirectUrl).hash
+                    .substring(1)
+                    .split("&")
+                    .find((param) => param.startsWith("access_token"))
+                    .split("=")[1];
+
+                fetchUserEmail(token)
+                .then((email) => {
+                    chrome.storage.local.get("accounts", (result) => {
+                        const accounts = result.accounts || [];
+                        accounts.push({ email, token });
+                        chrome.storage.local.set({ accounts }, () => {
+                            console.log("Account added:", email);
+                        });
+                    });
+
+                    sendResponse({ email });
+                })
+                .catch((error) => {
+                    sendResponse({ error: "Failed to fetch user email.\n" + error });
+                });
             }
-
-            const token = new URL(redirectUrl).hash
-                .substring(1)
-                .split("&")
-                .find((param) => param.startsWith("access_token"))
-                .split("=")[1];
-
-            fetchUserEmail(token)
-              .then((email) => {
-                  chrome.storage.local.get("accounts", (result) => {
-                      const accounts = result.accounts || [];
-                      accounts.push({ email, token });
-                      chrome.storage.local.set({ accounts }, () => {
-                          console.log("Account added:", email);
-                      });
-                  });
-
-                  sendResponse({ email });
-              })
-              .catch((error) => {
-                  sendResponse({ error: "Failed to fetch user email.\n" + error });
-              });
-
-            return true; // Indicate that the response will be sent asynchronously
-        }
-    );
+        );
+        return true; // Indicate that the response will be sent asynchronously
     }
 });

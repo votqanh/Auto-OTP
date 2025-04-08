@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Auto OTP",
   "version": "1.0",
-  "description": "Authenticate with Gmail and autofill OTPs from emails",
+  "description": "Autofill OTPs from email",
   "permissions": [
     "identity",
     "storage",
