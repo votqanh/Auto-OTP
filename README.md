@@ -24,9 +24,3 @@ Log in once, sit back, and let the extension handle the rest!
 - [ ] Add copy to clipboard
 - [ ] Add support for Proton and Outlook
 - [ ] Add support for alphanumeric and longer OTPs
-
-## Privacy Policy
-You can view our Privacy Policy [here](./docs/privacy-policy.pdf).
-
-## Terms of Service
-You can view our Terms of Service [here](./docs/terms-of-service.pdf).
