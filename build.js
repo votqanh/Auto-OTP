@@ -9,7 +9,7 @@ Promise.all([
         outfile: 'dist/background.js',
     }),
     esbuild.build({
-        entryPoints: ['src/popup.js'],
+        entryPoints: ['src/popup/index.js'],
         bundle: true,
         platform: 'browser', // For popup script
         format: 'iife', // For browser compatibility
