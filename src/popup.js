@@ -2,13 +2,20 @@ import { addAccountElement } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Popup loaded");
-
+    var hasAccounts = false;
     // Load existing accounts from storage
     chrome.storage.local.get("accounts", (result) => {
         const accounts = result.accounts || [];
+        hasAccounts = accounts.length > 0;
+
         accounts.forEach((account) => {
             addAccountElement(account.email);
         });
+
+        const getOtpButton = document.getElementById("getOtp");
+        if (getOtpButton) {
+            getOtpButton.style.display = hasAccounts ? "block" : "none";
+        }
     });
 
     // Add Account button
@@ -17,6 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.email) {
                 console.log("Account added:", response.email);
                 addAccountElement(response.email);
+
+                const getOtpButton = document.getElementById("getOtp");
+                if (getOtpButton) {
+                    getOtpButton.style.display = "block";
+                }
             } else {
                 console.error("Failed to add account.");
             }
