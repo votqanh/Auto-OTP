@@ -119,41 +119,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         // Return true to indicate that the response will be sent asynchronously
         return true;
-    }
-
-    else if (request.action === "addAccount") {
+    } else if (request.action === "addAccount") {
         chrome.identity.launchWebAuthFlow(
             { url: authUrl, interactive: true },
-            (redirectUrl) => {
+            async (redirectUrl) => {
                 if (chrome.runtime.lastError || !redirectUrl) {
                     console.error("OAuth Error:", chrome.runtime.lastError);
                     alert("Sign-in failed. Please try again.");
                     return;
                 }
-
+                console.log("Logged in successfully:", redirectUrl);
                 const token = new URL(redirectUrl).hash
                     .substring(1)
                     .split("&")
                     .find((param) => param.startsWith("access_token"))
                     .split("=")[1];
 
-                fetchUserEmail(token)
-                .then((email) => {
+                console.log("Access Token:", token);
+                try {
+                    const email = await fetchUserEmail(token)
+                    console.log("User Email:", email);
+
                     chrome.storage.local.get("accounts", (result) => {
                         const accounts = result.accounts || [];
-                        accounts.push({ email, token });
-                        chrome.storage.local.set({ accounts }, () => {
-                            console.log("Account added:", email);
-                        });
+                        if (accounts.some((account) => account.email === email)) {
+                            console.log("Account already exists:", email);
+                            sendResponse({ error: "Account already exists." });
+                            return true;
+                        } else {
+                            accounts.push({ email, token });
+                            chrome.storage.local.set({ accounts }, () => {
+                                // console.log("Account added:", email);
+                                sendResponse({ email });
+                                return true;
+                            });
+                        }
                     });
-
-                    sendResponse({ email });
-                })
-                .catch((error) => {
+                } catch (error) {
                     sendResponse({ error: "Failed to fetch user email.\n" + error });
-                });
+                    return true;
+                }
+
+                console.log("End of function");
             }
         );
-        return true; // Indicate that the response will be sent asynchronously
+
+        return true;
     }
 });

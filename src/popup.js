@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add Account button
     document.getElementById("addAccount").addEventListener("click", () => {
         chrome.runtime.sendMessage({ action: "addAccount" }, (response) => {
+          console.log("Response from background script:", response);
             if (response.email) {
                 console.log("Account added:", response.email);
                 addAccountElement(response.email);
@@ -29,8 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (getOtpButton) {
                     getOtpButton.style.display = "block";
                 }
-            } else {
-                console.error("Failed to add account.");
+            } else if (response.error) {
+                if (response.error === "Account already exists.") {
+                    alert("Account already exists.");
+                } else {
+                    console.error("Error adding account:", response.error);
+                }
             }
           }
         );
