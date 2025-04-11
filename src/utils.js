@@ -22,6 +22,13 @@ export function addAccountElement(email) {
                 accountItem.remove();
                 console.log("Account removed:", email);
             });
+
+            if (updatedAccounts.length === 0) {
+                const getOtpButton = document.getElementById("getOtp");
+                if (getOtpButton) {
+                    getOtpButton.style.display = "none";
+                }
+            }
         });
     });
   
